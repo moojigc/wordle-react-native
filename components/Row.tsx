@@ -1,20 +1,8 @@
-import { useEffect, useState } from 'react';
-import {
-	ColorValue,
-	Dimensions,
-	StyleSheet,
-	StyleSheetProperties,
-	Text,
-	View
-} from 'react-native';
 import type { Row } from '../state/Row';
-import Box from './Box';
+import { StyleSheet, View } from 'react-native';
 
-const localStyles = StyleSheet.create({
-	row: {
-		flexDirection: 'row'
-	}
-});
+import LetterBox from './LetterBox';
+import screenSize from '../state/Dimensions';
 
 export default function GuessRow({
 	styles,
@@ -23,6 +11,12 @@ export default function GuessRow({
 	styles?: any;
 	guess: Row;
 }) {
+	const localStyles = StyleSheet.create({
+		row: {
+			flexDirection: 'row',
+			maxWidth: screenSize.dimensions.width
+		}
+	});
 	return (
 		<>
 			<View
@@ -32,14 +26,7 @@ export default function GuessRow({
 				}}
 			>
 				{guess.map((letter, i) => (
-					<Box
-						key={i}
-						letter={letter}
-						styles={{
-							width: 50,
-							height: 50
-						}}
-					></Box>
+					<LetterBox key={i} letter={letter}></LetterBox>
 				))}
 			</View>
 		</>

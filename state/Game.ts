@@ -5,39 +5,62 @@ import { Utils } from './utils';
 
 export class Game {
 	static readonly MAX_GUESSES_ALLOWED = 5;
+	static readonly PLACEHOLDER = Utils.padEmptyStrings(Row.MAX_LEN);
 
-	static async getWordOfTheDay() {
-		this.instance.start('WORDLE');
-	}
 	static instance = new this();
 	private constructor() {
 		makeAutoObservable(this);
 	}
 
-	WORD_OF_THE_DAY: string = Utils.padEmptyStrings(Row.MAX_LEN);
+	WORD_OF_THE_DAY: string = Game.PLACEHOLDER;
 	status: GameConstants.GAME_STATUS = GameConstants.GAME_STATUS.PROGRESS;
 	rows = [new Row(this, 0)];
 
-	@action
-	start(WORD_OF_THE_DAY: string) {
-		if (this.WORD_OF_THE_DAY !== WORD_OF_THE_DAY) {
-			this.WORD_OF_THE_DAY = WORD_OF_THE_DAY;
-		}
+	get activeRow() {
+		return this.rows[this.rows.length - 1];
+	}
+
+	async start() {
+		setTimeout(() => {
+			this.setWordOfTheDay('WORDLE');
+		}, 1000);
+		return this;
 	}
 
 	@action
-	setStatus(status: GameConstants.GAME_STATUS) {
-		this.status = status;
+	setWordOfTheDay(WORD_OF_THE_DAY: string) {
+		if (this.WORD_OF_THE_DAY !== WORD_OF_THE_DAY) {
+			this.WORD_OF_THE_DAY = WORD_OF_THE_DAY;
+		}
+		return this;
+	}
+
+	@action
+	setWon() {
+		this.status = GameConstants.GAME_STATUS.WON;
+		return this;
+	}
+
+	@action
+	setLost() {
+		this.status = GameConstants.GAME_STATUS.LOST;
+		return this;
 	}
 
 	@action
 	refresh() {
 		this.rows = [...this.rows];
+		return this;
 	}
 
 	@computed
 	get maxGuessesReached() {
 		return this.rows.length === Game.MAX_GUESSES_ALLOWED;
+	}
+
+	@computed
+	get isReady() {
+		return this.WORD_OF_THE_DAY !== Game.PLACEHOLDER;
 	}
 }
 
