@@ -1,0 +1,18 @@
+{
+  "build": {
+    "preview": {
+      "android": {
+        "buildType": "apk"
+      }
+    },
+    "prod": {
+      "releaseChannel": "prod-v1"
+    },
+    "staging": {
+      "releaseChannel": "staging"
+    }
+  },
+  "cli": {
+    "version": ">= 0.47.0"
+  }
+}

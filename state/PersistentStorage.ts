@@ -1,9 +1,26 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-class NonUniqueError extends Error {
-	constructor(key: string) {
-		super(`${key} already exists.`);
+export default class PersistentStore<T = any> {
+	constructor(public key: string) {}
+	async read() {
+		const item = await AsyncStorage.getItem(this.key);
+		if (item) {
+			return this._deserialize(item) as T;
+		} else {
+			return null;
+		}
 	}
-	readonly name = 'NonUniqueError';
+
+	async save(value: T) {
+		await AsyncStorage.setItem(this.key, this._serialize(value));
+		return value;
+	}
+
+	private _serialize(obj: any) {
+		return JSON.stringify(obj);
+	}
+
+	private _deserialize(value: string) {
+		return JSON.parse(value);
+	}
 }
-export default class PersistentStore {}

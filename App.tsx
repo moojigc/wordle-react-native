@@ -9,21 +9,21 @@ import {
 	TextInput,
 	View
 } from 'react-native';
-import Row from './components/Row';
+import Row from './components/GuessRow';
 import { observer } from 'mobx-react';
 import game, { type Game } from './state/Game';
 import Result from './components/Result';
 
-import { TITLE } from './constants/text';
 import Keyboard from './components/Keyboard/Keyboard';
-import { GameConstants } from './constants';
 import screenSize, { ScreenSize } from './state/Dimensions';
+import { Colors } from './constants/Colors';
+import NavBar from './components/Navbar';
 
 const _App = ({ game, screenSize }: { game: Game; screenSize: ScreenSize }) => {
 	const styles = StyleSheet.create({
 		container: {
 			flex: 1,
-			backgroundColor: '#fff',
+			backgroundColor: Colors.gray,
 			alignItems: 'center',
 			justifyContent: 'center'
 		},
@@ -35,14 +35,16 @@ const _App = ({ game, screenSize }: { game: Game; screenSize: ScreenSize }) => {
 			height: screenSize.dimensions.width,
 			width: screenSize.dimensions.height,
 			position: 'absolute'
+		},
+		rowContainer: {
+			position: 'absolute',
+			top: -screenSize.fontSize * 16
 		}
 	});
 
-	// Get the word of the day and start!!!
-	game.start();
-
 	return (
 		<View style={styles.container}>
+			<NavBar />
 			<View
 				style={{
 					marginTop: screenSize.dimensions.fontScale * 100,
@@ -50,30 +52,23 @@ const _App = ({ game, screenSize }: { game: Game; screenSize: ScreenSize }) => {
 					flexDirection: 'column'
 				}}
 			>
-				<Text
-					style={{
-						position: 'absolute',
-						top: -screenSize.dimensions.height / 3
-					}}
-				>
-					{TITLE}
-				</Text>
-
-				{game.isReady ? (
-					game.rows.map((r, i) => (
-						<Row
-							key={i}
-							guess={r}
-							styles={{
-								width: screenSize.dimensions.width,
-								justifyContent: 'center'
-								// marginLeft: dimensions.window.fontScale * 100
-							}}
-						/>
-					))
-				) : (
-					<Text>Game loading...</Text>
-				)}
+				<View style={styles.rowContainer}>
+					{game.isReady ? (
+						game.rows.map((r, i) => (
+							<Row
+								key={i}
+								row={r}
+								styles={{
+									width: screenSize.dimensions.width,
+									justifyContent: 'center'
+									// marginLeft: dimensions.window.fontScale * 100
+								}}
+							/>
+						))
+					) : (
+						<Text>Game loading...</Text>
+					)}
+				</View>
 			</View>
 
 			<Image
@@ -84,15 +79,8 @@ const _App = ({ game, screenSize }: { game: Game; screenSize: ScreenSize }) => {
 				source={require('./assets/images/cute_selfie.jpg')}
 			/>
 			<StatusBar style='auto' />
-			{game.status === GameConstants.GAME_STATUS.PROGRESS ? (
-				<Keyboard />
-			) : (
-				<Result
-					style={{
-						top: screenSize.dimensions.height * 0.25
-					}}
-				/>
-			)}
+			<Result />
+			<Keyboard />
 		</View>
 	);
 };
@@ -100,5 +88,7 @@ const _App = ({ game, screenSize }: { game: Game; screenSize: ScreenSize }) => {
 const _AppWithState = observer(_App);
 
 export default function App() {
+	// Get the word of the day and start!!!
+	game.start();
 	return <_AppWithState game={game} screenSize={screenSize} />;
 }

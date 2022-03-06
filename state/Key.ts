@@ -1,6 +1,6 @@
 import { action, computed, makeAutoObservable, observable } from 'mobx';
 import { colors } from 'react-native-elements';
-import { GameConstants } from '../constants';
+import { GameConstants } from '../constants/GameConstants';
 import game from './Game';
 
 export class KeyState {
@@ -13,12 +13,15 @@ export class KeyState {
 	static BOTTOM_ROW = ['Z', 'X', 'C', 'V', 'B', 'N', 'M'].map(
 		(l) => new this(l)
 	);
-	static ENTER = new this(GameConstants.SPECIAL_KEYS.ENTER, true);
+	static ENTER = new this(
+		GameConstants.SPECIAL_KEYS.ENTER,
+		(key) => !key.game.activeRow.allPositionsGuessed
+	);
 	static BACKSPACE = new this(GameConstants.SPECIAL_KEYS.BACKSPACE);
 
 	constructor(
 		public readonly value: string | GameConstants.SPECIAL_KEYS,
-		public disabled = false
+		private _getDisabled?: (key: KeyState) => boolean
 	) {
 		makeAutoObservable(this);
 	}
@@ -42,16 +45,19 @@ export class KeyState {
 		return this;
 	}
 
-	async onPress() {
+	onPress() {
 		this.game.activeRow.currentLetter.update(this.value);
-		console.log(this.game.activeRow.allPositionsGuessed);
-		if (this.game.activeRow.allPositionsGuessed) {
-			KeyState.ENTER.setDisabled(false);
-		}
 	}
 
-	@action
-	setDisabled(bool: boolean) {
-		this.disabled = bool;
+	@computed
+	get disabled() {
+		if (this._getDisabled) {
+			return this._getDisabled(this);
+		} else {
+			return (
+				this.game.usedLetterMap.get(this.value) ===
+				GameConstants.LETTER_STATUS.WRONG
+			);
+		}
 	}
 }

@@ -1,5 +1,5 @@
-import { action, observable } from 'mobx';
-import { Dimensions, ScaledSize } from 'react-native';
+import { action, computed, observable } from 'mobx';
+import { Dimensions, ScaledSize, StatusBar } from 'react-native';
 
 export class ScreenSize {
 	static instance = new this();
@@ -22,6 +22,11 @@ export class ScreenSize {
 
 	@observable
 	dimensions: ScaledSize;
+
+	@computed
+	get fontSize() {
+		return this.screen.fontScale * 20;
+	}
 }
 
 const screenSize = ScreenSize.instance;

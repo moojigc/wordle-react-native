@@ -1,6 +1,5 @@
 import { observer } from 'mobx-react-lite';
-import { useState } from 'react';
-import { Dimensions, StyleSheet, ViewProps } from 'react-native';
+import { Dimensions, StyleSheet, Vibration, ViewProps } from 'react-native';
 import { Button, ButtonProps, colors, Icon } from 'react-native-elements';
 import { KeyState } from '../../state/Key';
 
@@ -21,12 +20,14 @@ const styles = StyleSheet.create({
 	}
 });
 
-function _KeyComponent(
-	props: Omit<ButtonProps, 'onPress' | 'title'> & {
-		style?: ViewProps['style'];
-		keyState: KeyState;
-	}
-) {
+type KeyComponentArgs = Omit<ButtonProps, 'onPress' | 'title'> & {
+	style?: ViewProps['style'];
+	keyState: KeyState;
+	vibrate: (pattern: number) => void;
+	disabled: boolean;
+};
+
+function _KeyComponent(props: KeyComponentArgs) {
 	const { keyState: state, ...rest } = props;
 	return (
 		<Button
@@ -47,22 +48,23 @@ function _KeyComponent(
 				fontSize: props.style?.fontSize || styles.key.fontSize,
 				color: state.color
 			}}
-			onPress={(e) => {
+			onPress={() => {
 				state.onPress();
 			}}
-			onPressIn={(e) => state.reverseColors()}
-			onPressOut={(e) => state.reverseColors()}
+			onPressIn={(e) => {
+				state.reverseColors();
+				props.vibrate(10);
+			}}
+			onPressOut={(e) => {
+				state.reverseColors();
+				props.vibrate(5);
+			}}
 		></Button>
 	);
 }
 
 const StatefulKeyComponent = observer(_KeyComponent);
 
-export default function KeyComponent(
-	props: Omit<ButtonProps, 'onPress'> & {
-		style?: ViewProps['style'];
-		keyState: KeyState;
-	}
-) {
+export default function KeyComponent(props: KeyComponentArgs) {
 	return <StatefulKeyComponent {...props} />;
 }

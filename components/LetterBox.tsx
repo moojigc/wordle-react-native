@@ -10,7 +10,7 @@ import {
 	Text,
 	ViewStyle
 } from 'react-native';
-import { GameConstants } from '../constants';
+import { GameConstants } from '../constants/GameConstants';
 import { Colors } from '../constants/Colors';
 import screenSize from '../state/Dimensions';
 import { Letter } from '../state/Letter';
@@ -43,13 +43,24 @@ export default function LetterBox({
 			margin: 1,
 			borderColor: '#3a3a3c',
 			height: window.width / 6,
+			width: window.width / 6,
 			borderStyle: 'solid',
 			borderWidth: 4,
-			borderRadius: 100
+			borderBottomColor: Colors.white,
+			borderTopColor: Colors.white,
+			borderLeftColor: Colors.white,
+			borderRightColor: Colors.white,
+			borderStartColor: Colors.white,
+			borderEndColor: Colors.white,
+			borderRadius: 1,
+			shadowColor: Colors.white,
+			shadowOffset: { width: 10, height: 0 },
+			shadowRadius: 100,
+			shadowOpacity: 0.1
 		},
 		text: {
 			fontSize: screenSize.dimensions.fontScale * 40,
-			color: '#ffffff',
+			color: Colors.white,
 			textAlign: 'center',
 			fontWeight: 'bold'
 		}

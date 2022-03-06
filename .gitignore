@@ -11,6 +11,7 @@ npm-debug.*
 web-build/
 assets/images
 constants/text.ts
-
+constants/text.*.ts
+temp/
 # macOS
 .DS_Store

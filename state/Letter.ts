@@ -2,7 +2,7 @@ import type { Row } from './Row';
 import type { Text, View } from 'react-native';
 
 import { action, computed, makeAutoObservable, observable } from 'mobx';
-import { GameConstants } from '../constants';
+import { GameConstants } from '../constants/GameConstants';
 import { Utils } from './utils';
 
 export class Letter {
@@ -83,7 +83,7 @@ export class Letter {
 	}
 
 	@action
-	// @Utils.debug()
+	// @Utils.log()
 	update(newLetter: string) {
 		switch (newLetter) {
 			case GameConstants.SPECIAL_KEYS.BACKSPACE:
@@ -92,7 +92,7 @@ export class Letter {
 				} else {
 					this.value = GameConstants.FILLER_VALUE;
 					this.row.update();
-					this.moveToPreviousInputRef();
+					this.row.setCurrentLetter(this);
 				}
 				break;
 			case GameConstants.SPECIAL_KEYS.ENTER:
@@ -112,16 +112,7 @@ export class Letter {
 		return this;
 	}
 
-	moveToPreviousInputRef() {
-		const previous = this.previous();
-		if (!previous) {
-			return;
-		}
-		this.row.setCurrentLetter(previous);
-		previous.inputRef?.focus();
-		return previous;
-	}
-
+	// @Utils.log()
 	moveToNextInputRef() {
 		const next = this.next();
 		if (!next) {

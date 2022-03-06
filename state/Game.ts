@@ -1,30 +1,65 @@
-import { action, computed, makeAutoObservable } from 'mobx';
-import { GameConstants } from '../constants';
-import { Row } from './Row';
+import { action, computed, makeAutoObservable, observable } from 'mobx';
+import { GameConstants } from '../constants/GameConstants';
+import { Row, RowSerialized } from './Row';
 import { Utils } from './utils';
+import english_words_5 from '../temp/english_words_5.json';
+import PersistentStore from './PersistentStorage';
 
 export class Game {
 	static readonly MAX_GUESSES_ALLOWED = 5;
 	static readonly PLACEHOLDER = Utils.padEmptyStrings(Row.MAX_LEN);
-
 	static instance = new this();
+	static async getWordOfTheDay() {
+		const today = Date.now() / 1000 / 60 / 60 / 24;
+		const index = Math.floor(today - GameConstants.JAN_1_2022);
+		return new Promise<string>((resolve) => {
+			setTimeout(() => {
+				resolve(english_words_5[index].toUpperCase());
+			}, 500);
+		});
+	}
+
 	private constructor() {
 		makeAutoObservable(this);
+		this.usedLetterMap = new Map();
+	}
+	private _getNewRows() {
+		return [0, 1, 2, 3, 4].map((r) => new Row(this, r));
 	}
 
 	WORD_OF_THE_DAY: string = Game.PLACEHOLDER;
 	status: GameConstants.GAME_STATUS = GameConstants.GAME_STATUS.PROGRESS;
-	rows = [new Row(this, 0)];
+	rows = this._getNewRows();
+	store = new PersistentStore<RowSerialized[]>('puzzled-store');
 
-	get activeRow() {
-		return this.rows[this.rows.length - 1];
+	@computed
+	get activeRow(): Row {
+		return this.rows.find((r) => !r.isFinalAnswer) || this.rows[4];
 	}
 
+	@action
 	async start() {
-		setTimeout(() => {
-			this.setWordOfTheDay('WORDLE');
-		}, 1000);
+		this.setWordOfTheDay(await Game.getWordOfTheDay());
+		const existingRows = await this.store.read();
+		if (existingRows) {
+			for (let i = 0; i < existingRows.length; i++) {
+				const guess = existingRows[i];
+				this._setRow(new Row(this, i, guess));
+			}
+		}
 		return this;
+	}
+
+	@action
+	reload() {
+		this.status = GameConstants.GAME_STATUS.PROGRESS;
+		this.usedLetterMap = new Map();
+		this.rows = this._getNewRows();
+	}
+
+	@action
+	private _setRow(row: Row) {
+		this.rows[row.index] = row;
 	}
 
 	@action
@@ -38,6 +73,7 @@ export class Game {
 	@action
 	setWon() {
 		this.status = GameConstants.GAME_STATUS.WON;
+		this;
 		return this;
 	}
 
@@ -55,13 +91,19 @@ export class Game {
 
 	@computed
 	get maxGuessesReached() {
-		return this.rows.length === Game.MAX_GUESSES_ALLOWED;
+		return (
+			this.rows.filter((r) => r.isFinalAnswer).length ===
+			Game.MAX_GUESSES_ALLOWED
+		);
 	}
 
 	@computed
 	get isReady() {
 		return this.WORD_OF_THE_DAY !== Game.PLACEHOLDER;
 	}
+
+	@observable
+	usedLetterMap: Map<string, GameConstants.LETTER_STATUS>;
 }
 
 const game = Game.instance;

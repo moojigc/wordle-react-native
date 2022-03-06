@@ -1,34 +1,37 @@
-import { GameConstants } from '../constants';
+import { GameConstants } from '../constants/GameConstants';
 
 export namespace Utils {
 	export function padEmptyStrings(length = 6) {
 		return ''.padEnd(length, GameConstants.FILLER_VALUE);
 	}
+	type Fn = (...args: any[]) => any;
 	/**
 	 * Log the args of a method call
 	 */
-	export function debug<T>() {
+	export function log<T extends Fn>() {
 		return (
 			target: any,
 			method: string,
-			descriptor: PropertyDescriptor
+			descriptor: TypedPropertyDescriptor<T>
 		) => {
 			const original = descriptor.value!;
-			Object.defineProperty(target, method, {
+			return {
 				...descriptor,
-				value(...args: any[]) {
-					// @ts-ignore
+				value: function (...args: any[]) {
 					const returns = original.bind(this)(...args);
 					console.log(
-						`${
-							target.debugID ||
+						`[${
+							// @ts-ignore
+							this.debugID ||
 							target.name ||
 							target.constructor.name
-						}.${method}(${args.join(', ')}): ${returns}`
+						} ${new Date().toLocaleTimeString()}].${method}(${args.join(
+							', '
+						)}): ${returns}`
 					);
 					return returns;
 				}
-			});
+			};
 		};
 	}
 }

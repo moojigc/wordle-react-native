@@ -1,25 +1,7 @@
-import type { Game } from '../../state/Game';
-import { useState } from 'react';
-import {
-	Dimensions,
-	StyleSheet,
-	Text,
-	TextInputProps,
-	View,
-	ViewProps
-} from 'react-native';
-import {
-	Icon,
-	colors,
-	Colors,
-	Button,
-	ButtonProps
-} from 'react-native-elements';
-import { IconNode } from 'react-native-elements/dist/icons/Icon';
-import { GameConstants } from '../../constants';
+import { Dimensions, StyleSheet, Vibration, View } from 'react-native';
+import { Icon } from 'react-native-elements';
 import { KeyState } from '../../state/Key';
 import KeyComponent from './KeyComponent';
-import game from '../../state/Game';
 
 const dimensions = Dimensions.get('window');
 const styles = StyleSheet.create({
@@ -44,6 +26,15 @@ export default function Keyboard() {
 	const enterAndBackSpaceWidth =
 		dimensions.width - keyWidth * (KeyState.TOP_ROW.length - 0.5);
 
+	let vibration = false;
+	const vibrate = (pattern: number) => {
+		if (!vibration) {
+			vibration = true;
+			Vibration.vibrate(pattern);
+			vibration = false;
+		}
+	};
+
 	return (
 		<View style={styles.container}>
 			<View style={styles.flex}>
@@ -53,8 +44,10 @@ export default function Keyboard() {
 							width: keyWidth,
 							height: keyHeight
 						}}
+						vibrate={vibrate}
 						keyState={r}
 						key={r.value}
+						disabled={r.disabled}
 					/>
 				))}
 			</View>
@@ -66,7 +59,9 @@ export default function Keyboard() {
 							height: keyHeight
 						}}
 						keyState={r}
+						vibrate={vibrate}
 						key={r.value}
+						disabled={r.disabled}
 					/>
 				))}
 			</View>
@@ -80,8 +75,9 @@ export default function Keyboard() {
 						paddingLeft: 1,
 						paddingRight: 1
 					}}
-					disabled={!game.activeRow.allPositionsGuessed}
 					keyState={KeyState.ENTER}
+					vibrate={vibrate}
+					disabled={KeyState.ENTER.disabled}
 				/>
 				{KeyState.BOTTOM_ROW.map((r) => (
 					<KeyComponent
@@ -89,8 +85,10 @@ export default function Keyboard() {
 							width: keyWidth,
 							height: keyHeight
 						}}
+						vibrate={vibrate}
 						keyState={r}
 						key={r.value}
+						disabled={r.disabled}
 					/>
 				))}
 				<KeyComponent
@@ -98,6 +96,8 @@ export default function Keyboard() {
 						width: enterAndBackSpaceWidth,
 						height: keyHeight
 					}}
+					disabled={false}
+					vibrate={vibrate}
 					icon={
 						<Icon
 							name='backspace'
