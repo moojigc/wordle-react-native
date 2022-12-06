@@ -9,9 +9,8 @@ npm-debug.*
 *.mobileprovision
 *.orig.*
 web-build/
-assets/images
-constants/text.ts
-constants/text.*.ts
+# assets/images
+constants/text.development.ts
 temp/
 # macOS
 .DS_Store

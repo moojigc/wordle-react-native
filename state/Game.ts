@@ -2,7 +2,7 @@ import { action, computed, makeAutoObservable, observable } from 'mobx';
 import { GameConstants } from '../constants/GameConstants';
 import { Row, RowSerialized } from './Row';
 import { Utils } from './utils';
-import english_words_5 from '../temp/english_words_5.json';
+import english_words_5 from '../constants/english_words_5.json';
 import PersistentStore from './PersistentStorage';
 
 export class Game {

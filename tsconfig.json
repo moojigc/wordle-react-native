@@ -4,6 +4,7 @@
     "strict": true,
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
-    "reactNamespace": "React"
+    "reactNamespace": "React",
+    "resolveJsonModule": true
   }
 }
